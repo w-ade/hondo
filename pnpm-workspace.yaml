@@ -1,0 +1,8 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# Approves native build scripts (sharp, unrs-resolver) for local pnpm.
+# Do NOT use onlyBuiltDependencies — it conflicts with the neverBuiltDependencies
+# that Vercel's build image injects, and aborts every deploy at install.
+dangerouslyAllowAllBuilds: true
