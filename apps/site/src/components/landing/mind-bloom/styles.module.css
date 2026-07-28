@@ -1,0 +1,318 @@
+/* Mind Bloom — pinned storytelling section. Warm white, hairlines, ink. */
+
+.stage {
+  position: relative;
+  background: var(--bg);
+}
+
+.sticky {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+}
+
+/* --- graph ---------------------------------------------------------- */
+
+.graph {
+  position: absolute;
+  inset: 0;
+}
+
+.graphPassive {
+  pointer-events: none;
+}
+
+/* --- narrative copy -------------------------------------------------- */
+
+.copy {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.thinkFirst {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(50% + 46px);
+  text-align: center;
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink-1);
+  opacity: 0;
+}
+
+.scrollHint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 34px;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  opacity: 0;
+}
+
+.closing {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 7%;
+  text-align: center;
+}
+
+.organizeLater {
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink-1);
+  opacity: 0;
+}
+
+.oneLiner {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--ink-3);
+  opacity: 0;
+}
+
+/* reduced-motion visibility: crossfade only, no movement */
+.rmVisible {
+  opacity: 1 !important;
+  transition: opacity 400ms ease;
+}
+
+.thinkFirst,
+.scrollHint,
+.organizeLater,
+.oneLiner {
+  transition: none;
+}
+
+/* --- phase 5 product chrome ------------------------------------------ */
+
+.chrome {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.chromeOn .topbar,
+.chromeOn .zoomCtls,
+.chromeOn .inspector {
+  pointer-events: auto;
+}
+
+.topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 18px;
+}
+
+.wordmark {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-1);
+}
+
+.wordmarkSub {
+  margin-left: 6px;
+  font-weight: 400;
+  color: var(--ink-4);
+}
+
+.badge {
+  font-size: 11px;
+  color: var(--ink-4);
+  border: 1px solid var(--stroke);
+  border-radius: 999px;
+  padding: 2px 9px;
+  background: var(--card);
+}
+
+.filters {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--card);
+  border: 1px solid var(--stroke);
+  border-radius: 999px;
+}
+
+.pill {
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--ink-3);
+  padding: 2px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.pill:hover {
+  color: var(--ink-1);
+}
+
+.pillOn {
+  background: #f0eeeb;
+  color: var(--ink-1);
+}
+
+.zoomCtls {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+  border: 1px solid var(--stroke);
+  border-radius: 9px;
+  overflow: hidden;
+}
+
+.zoomCtls button {
+  border: 0;
+  background: transparent;
+  width: 30px;
+  height: 28px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+.zoomCtls button + button {
+  border-top: 1px solid var(--stroke);
+}
+
+.zoomCtls button:hover {
+  background: #f5f3f0;
+}
+
+.hintLine {
+  position: absolute;
+  left: 18px;
+  bottom: 22px;
+  font-size: 11px;
+  color: var(--ink-4);
+}
+
+/* --- inspector -------------------------------------------------------- */
+
+.inspector {
+  position: absolute;
+  right: 18px;
+  top: 58px;
+  width: 268px;
+  max-height: calc(100svh - 140px);
+  overflow-y: auto;
+  background: var(--card);
+  border: 1px solid var(--stroke);
+  border-radius: 10px;
+  padding: 14px 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.inspectorType {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.inspectorTitle {
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--ink-1);
+}
+
+.inspectorSection {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--stroke);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+
+.count {
+  color: var(--ink-5);
+}
+
+.relations {
+  list-style: none;
+  margin-top: 6px;
+}
+
+.relations li + li {
+  border-top: 1px solid var(--stroke);
+}
+
+.relations button {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  padding: 6px 0;
+  cursor: pointer;
+}
+
+.relType {
+  flex: none;
+  width: 58px;
+  font-size: 11px;
+  color: var(--ink-4);
+}
+
+.relLabel {
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--ink-2);
+}
+
+.relations button:hover .relLabel {
+  color: var(--ink-1);
+}
+
+/* --- mobile ----------------------------------------------------------- */
+
+@media (max-width: 767px) {
+  .inspector {
+    top: auto;
+    right: 12px;
+    left: 12px;
+    bottom: 12px;
+    width: auto;
+    max-height: 38svh;
+  }
+
+  .zoomCtls {
+    bottom: auto;
+    top: 58px;
+  }
+
+  .thinkFirst,
+  .organizeLater {
+    font-size: 19px;
+  }
+}

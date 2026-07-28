@@ -1,0 +1,66 @@
+:root {
+  /* Hondo light palette (Figma DS, raw values) */
+  --bg: #faf9f7; /* warm white */
+  --panel: #fafafa;
+  --card: #ffffff;
+  --stroke: #e7e7e7;
+  --ink-1: #363636;
+  --ink-2: #555555;
+  --ink-3: #888888;
+  --ink-4: #9a9a9a;
+  --ink-5: #b0b0b0;
+
+  /* Accents (graph reference palette) */
+  --accent: #7c3aed;
+  --accent-blue: #6caff5;
+  --accent-green: #71c08e;
+  --accent-orange: #dd8f5c;
+  --accent-blue-text: #4285c8;
+  --accent-green-text: #3e8e63;
+  --accent-orange-text: #c0703c;
+
+  /* Landing surface — white, per the hero brief. Distinct from --bg (warm
+     white) so the mind-bloom experiment keeps its own stage. */
+  --site-bg: #ffffff;
+  --hairline: #ededed;
+  --hover: #f4f4f4;
+
+  /* The phone hero's plate — the recessed surface the app window is inset
+     into. A flat neutral fill, never a gradient. */
+  --stage: #f5f5f5;
+
+  /* Very soft, wide shadows. The window reads as raised, never as a card
+     with a drop shadow. */
+  --shadow-window:
+    0 1px 1px rgba(0, 0, 0, 0.02),
+    0 8px 16px -6px rgba(0, 0, 0, 0.05),
+    0 24px 48px -12px rgba(0, 0, 0, 0.07),
+    0 48px 96px -32px rgba(0, 0, 0, 0.08);
+  --shadow-button: 0 1px 2px rgba(0, 0, 0, 0.07);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: auto;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink-1);
+  font-family: var(--font-inter), -apple-system, sans-serif;
+  font-size: 13px;
+  line-height: 19px;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (max-width: 767px) {
+  body {
+    font-size: 14px;
+    line-height: 21px;
+  }
+}

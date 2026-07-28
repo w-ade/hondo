@@ -1,0 +1,1136 @@
+/* ==========================================================================
+   Hero — landing composition
+
+   Geometry is taken from Figma `400 CONNECT → Landing` (221:411), a 1440×1024
+   frame. Everything sits in one flush-left column whose width is the window's:
+
+     column   207 → 1233 of 1440   = 71.27% wide, 14.375% margins
+     wordmark 305.27 × 51.79 at y=136
+     headline y=218   (30px below the wordmark)
+     sub      y=248   (10px below the headline)
+     window   y=344   (88px below the sub), 1026.24 × 754
+
+   The window is taller than the space left below it, so it runs off the bottom
+   of the first viewport exactly as it does off the bottom of the frame.
+   ========================================================================== */
+
+.hero {
+  /* Frame panes: 227.34 and 228.77 of a 1026.24 window. Held as percentages so
+     the three-column proportion survives any viewport. */
+  --sidebar-w: 22.15%;
+  --agent-w: 22.29%;
+  --radius: 12px;
+  /* The column and the window are the same width — the copy hangs on the
+     window's left edge. */
+  --col: min(71.27%, 1280px);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 136px 0 120px;
+  background: var(--site-bg);
+}
+
+/* --------------------------------------------------------------- copy --- */
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: var(--col);
+  text-align: center;
+}
+
+/* Exported vector, never redrawn. The box is the designed node size; the
+   artwork overflows it slightly, so the leaf is sized and offset separately. */
+.wordmark {
+  position: relative;
+  width: 29.75%;
+  aspect-ratio: 305.2748 / 51.7887;
+}
+
+.wordmarkArt {
+  position: absolute;
+  left: -0.33%;
+  top: -1.96%;
+  width: 100.66%;
+  height: 103.92%;
+}
+
+.headline {
+  margin-top: 30px;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.017em;
+  color: #1a1a1a;
+}
+
+.sub {
+  margin-top: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-4);
+}
+
+/* -------------------------------------------------------------- stage --- */
+
+.stage {
+  width: var(--col);
+  display: flex;
+  margin-top: 88px;
+}
+
+/* ==========================================================================
+   The window
+   ========================================================================== */
+
+.window {
+  width: 100%;
+  /* 1026.24 × 754 in the frame. Height follows width so the window keeps its
+     drawn proportion at every viewport. */
+  aspect-ratio: 1026.24 / 754;
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-window);
+  overflow: hidden;
+  /* Contain the layout animations so a pill swap cannot reflow the page. */
+  contain: paint;
+}
+
+/* --------------------------------------------------------- window chrome */
+
+.chrome {
+  flex: none;
+}
+
+.titlebar,
+.titlebarCompact {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 38px;
+  padding: 0 12px;
+  background: #f6f6f6;
+  border-bottom: 1px solid var(--stroke);
+}
+
+.titlebarCompact {
+  height: 34px;
+}
+
+.lights {
+  display: flex;
+  gap: 7px;
+}
+
+.lights i {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  display: block;
+}
+
+.lights i[data-light="close"] {
+  background: #ff5f57;
+}
+.lights i[data-light="min"] {
+  background: #febc2e;
+}
+.lights i[data-light="max"] {
+  background: #28c840;
+}
+
+.windowTitle {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 44px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--stroke);
+  background: var(--card);
+}
+
+.crumbLeft,
+.crumbRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.crumbHome {
+  color: var(--ink-3);
+}
+
+.crumbMuted {
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.crumbSlash {
+  font-size: 13px;
+  color: var(--ink-5);
+}
+
+.crumbCurrent {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-1);
+}
+
+.crumbIcon {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-4);
+  cursor: default;
+  transition: background-color 0.16s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.crumbIcon:hover {
+  background: var(--hover);
+  color: var(--ink-2);
+}
+
+.shareBtn {
+  height: 28px;
+  padding: 0 13px;
+  border: 1px solid var(--stroke);
+  border-radius: 7px;
+  background: var(--card);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-1);
+  cursor: default;
+  transition: background-color 0.16s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.shareBtn:hover {
+  background: var(--hover);
+}
+
+/* -------------------------------------------------------------- panes --- */
+
+.panes {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr var(--agent-w);
+}
+
+/* ==========================================================================
+   Sidebar
+   ========================================================================== */
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--panel);
+  border-right: 1px solid var(--stroke);
+}
+
+.sidebarHead {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 42px;
+  padding: 0 12px;
+}
+
+.sidebarHeadIcon {
+  flex: none;
+  color: var(--ink-2);
+}
+
+.sidebarTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-1);
+}
+
+.versionPill {
+  flex: none;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: #efefef;
+  font-size: 11px;
+  white-space: nowrap;
+  color: var(--ink-3);
+}
+
+.sidebarClose {
+  margin-left: auto;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--ink-4);
+  cursor: default;
+}
+
+.sidebarClose:hover {
+  background: var(--hover);
+}
+
+.sidebarScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 6px 10px 16px;
+  scrollbar-width: thin;
+  scrollbar-color: #dcdcdc transparent;
+}
+
+.groupLabel {
+  margin: 12px 6px 6px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+
+.sectionList,
+.groupList,
+.cardList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sectionItem,
+.sectionItemOn {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: color 0.16s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sectionItem:hover {
+  color: var(--ink-1);
+}
+
+.sectionItem:hover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 7px;
+  background: var(--hover);
+}
+
+.sectionItemOn {
+  color: var(--ink-1);
+  font-weight: 500;
+}
+
+/* The travelling selection. layoutId moves this between rows; the rows
+   themselves never move. */
+.sectionPill {
+  position: absolute;
+  inset: 0;
+  border-radius: 7px;
+  background: #ececec;
+}
+
+.sectionLabel {
+  position: relative;
+}
+
+.groupRow {
+  padding: 1px 0;
+}
+
+.groupHead {
+  display: flex;
+  align-items: center;
+  border-radius: 7px;
+}
+
+.groupHead:hover {
+  background: var(--hover);
+}
+
+.groupToggle {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 4px 7px 8px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink-1);
+  cursor: pointer;
+}
+
+.groupChevron {
+  display: grid;
+  place-items: center;
+  color: var(--ink-4);
+}
+
+.groupName {
+  font-weight: 500;
+}
+
+.groupCount {
+  color: var(--ink-4);
+  font-size: 12px;
+}
+
+.groupAdd {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin-right: 4px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--ink-4);
+  cursor: default;
+}
+
+.groupAdd:hover {
+  background: #ececec;
+}
+
+.cardList {
+  padding: 2px 0 6px;
+}
+
+.conceptCard,
+.conceptCardOpen {
+  margin: 4px 0;
+  border: 1px solid var(--stroke);
+  border-radius: 9px;
+  background: var(--card);
+  overflow: hidden;
+  transition: border-color 0.16s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.conceptCard:hover,
+.conceptCardOpen:hover {
+  border-color: #dcdcdc;
+}
+
+.conceptHead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  color: var(--ink-1);
+  cursor: pointer;
+}
+
+.conceptTitle {
+  font-weight: 500;
+}
+
+.conceptDots {
+  margin-left: auto;
+  color: var(--ink-5);
+}
+
+.conceptBody {
+  padding: 0 12px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+.conceptMeta {
+  padding: 8px 12px 11px;
+  font-size: 11.5px;
+  color: var(--ink-4);
+}
+
+/* ==========================================================================
+   Content pane
+   ========================================================================== */
+
+.content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--card);
+}
+
+.toolbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 44px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--stroke);
+  overflow: hidden;
+}
+
+.toolGroup {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.tool,
+.toolStyle {
+  display: grid;
+  place-items: center;
+  min-width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-2);
+  cursor: default;
+  transition: background-color 0.16s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toolStyle {
+  grid-auto-flow: column;
+  gap: 2px;
+  padding: 0 4px;
+}
+
+.tool:hover,
+.toolStyle:hover {
+  background: var(--hover);
+}
+
+.toolT {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink-1);
+}
+
+.toolCaret {
+  color: var(--ink-4);
+  transform: rotate(90deg);
+}
+
+.toolFx {
+  font-size: 13px;
+  font-style: italic;
+  color: var(--ink-2);
+}
+
+.toolSep {
+  width: 1px;
+  height: 18px;
+  margin: 0 4px;
+  background: var(--hairline);
+}
+
+.docScroll,
+.docScrollCompact {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #dcdcdc transparent;
+}
+
+.docSwap {
+  min-height: 100%;
+}
+
+/* The export fills the pane width and runs past the fold, so the crop reads
+   as a document continuing rather than a letterboxed picture. */
+.docImage {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ------------------------------------------------- live document view --- */
+
+.doc {
+  padding: 40px 56px 64px;
+  max-width: 680px;
+}
+
+.docH1 {
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--ink-1);
+}
+
+.docH2 {
+  margin-top: 26px;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ink-1);
+}
+
+.docP {
+  margin-top: 16px;
+  font-size: 15px;
+  line-height: 1.62;
+  color: #2f2f2f;
+}
+
+.docStruck {
+  margin-top: 16px;
+  font-size: 15px;
+  line-height: 1.62;
+  color: var(--ink-4);
+  text-decoration: line-through;
+}
+
+.docRevision {
+  margin-top: 6px;
+  font-size: 15px;
+  line-height: 1.62;
+}
+
+.docRevisionText {
+  background: #f3edfe;
+  box-shadow: 0 0 0 2px #f3edfe;
+  color: var(--accent);
+}
+
+.docList {
+  margin-top: 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.docLi {
+  display: flex;
+  gap: 8px;
+  font-size: 15px;
+  line-height: 1.62;
+  color: #2f2f2f;
+}
+
+.docLiNum {
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.caret {
+  display: inline-block;
+  width: 1.5px;
+  height: 19px;
+  margin-top: 14px;
+  background: var(--ink-1);
+  animation: blink 1.1s steps(1) infinite;
+}
+
+@keyframes blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  50.01%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ==========================================================================
+   Agent panel
+   ========================================================================== */
+
+.agent {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--panel);
+  border-left: 1px solid var(--stroke);
+}
+
+.agentHead {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 42px;
+  padding: 0 12px;
+}
+
+.agentHeadIcon {
+  flex: none;
+  color: var(--ink-2);
+}
+
+.agentTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-1);
+}
+
+.agentMore {
+  margin-left: auto;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--ink-4);
+  cursor: default;
+}
+
+.agentMore:hover {
+  background: var(--hover);
+}
+
+.agentTabs {
+  flex: none;
+  display: flex;
+  gap: 4px;
+  padding: 0 10px;
+  border-bottom: 1px solid var(--stroke);
+}
+
+.agentTab,
+.agentTabOn {
+  position: relative;
+  padding: 8px 8px 10px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink-4);
+  cursor: pointer;
+  transition: color 0.16s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.agentTab:hover {
+  color: var(--ink-2);
+}
+
+.agentTabOn {
+  color: var(--ink-1);
+  font-weight: 500;
+}
+
+.agentTabRule {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: -1px;
+  height: 1.5px;
+  background: var(--ink-1);
+  border-radius: 2px;
+}
+
+.agentScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px 12px 4px;
+  scrollbar-width: thin;
+  scrollbar-color: #dcdcdc transparent;
+}
+
+.thread {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.noteCard,
+.answerCard {
+  position: relative;
+  padding: 12px;
+  border: 1px solid var(--stroke);
+  border-radius: 10px;
+  background: var(--card);
+}
+
+.answerBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 10px;
+  margin-bottom: 2px;
+  color: var(--ink-4);
+}
+
+.answerGrip {
+  width: 8px;
+  height: 12px;
+  background-image: radial-gradient(circle, var(--ink-5) 1px, transparent 1px);
+  background-size: 4px 4px;
+  opacity: 0.9;
+}
+
+.answerTools {
+  display: flex;
+  gap: 6px;
+  color: var(--accent);
+}
+
+.answerLabel {
+  margin-left: auto;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+
+.msgP {
+  font-size: 13px;
+  line-height: 1.54;
+  color: var(--ink-2);
+}
+
+.msgP + .msgP {
+  margin-top: 11px;
+}
+
+.msgActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+  color: var(--ink-5);
+}
+
+.sourcesPill {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 2px 8px;
+  border: 1px solid var(--stroke);
+  border-radius: 6px;
+  font-size: 11.5px;
+  color: var(--ink-3);
+}
+
+.instruction {
+  font-size: 13px;
+  line-height: 1.54;
+  color: var(--ink-4);
+}
+
+.agentEmpty {
+  padding: 6px 2px;
+}
+
+.agentEmptyTitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-1);
+}
+
+.agentEmptyBody {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.54;
+  color: var(--ink-3);
+}
+
+.sourcesBar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 38px;
+  padding: 0 14px;
+  border-top: 1px solid var(--stroke);
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+.sourcesCaret {
+  color: var(--ink-4);
+}
+
+.composer {
+  flex: none;
+  margin: 0 12px 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--stroke);
+  border-radius: 10px;
+  background: var(--card);
+}
+
+.composerPlaceholder {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-4);
+}
+
+.composerCaret {
+  display: inline-block;
+  width: 1.5px;
+  height: 13px;
+  margin-left: 1px;
+  vertical-align: -2px;
+  background: var(--ink-2);
+}
+
+.composerRow {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.composerAdd {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-3);
+  cursor: default;
+}
+
+.composerAdd:hover {
+  background: var(--hover);
+}
+
+.composerSend {
+  margin-left: auto;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  cursor: default;
+}
+
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+
+.footer,
+.footerCompact {
+  flex: none;
+  display: flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 16px;
+  border-top: 1px solid var(--stroke);
+  background: var(--card);
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.footerCount {
+  white-space: nowrap;
+}
+
+.timeline {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0 auto;
+}
+
+.timeline i {
+  width: 1.5px;
+  height: 11px;
+  border-radius: 1px;
+  background: var(--ink-5);
+}
+
+.timeline i[data-tone="accent"] {
+  background: var(--accent);
+}
+.timeline i[data-tone="blue"] {
+  background: var(--accent-blue);
+}
+.timeline i[data-tone="green"] {
+  background: var(--accent-green);
+}
+.timeline i[data-tone="orange"] {
+  background: var(--accent-orange);
+}
+
+.footerRight {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   Tablet — reduce chrome, keep the hierarchy
+   ========================================================================== */
+
+@media (max-width: 1199px) and (min-width: 768px) {
+  .hero {
+    --sidebar-w: 26%;
+    --col: 88%;
+    padding-top: 88px;
+  }
+
+  .wordmark {
+    width: 34%;
+  }
+
+  .stage {
+    margin-top: 64px;
+  }
+
+  /* Reduce chrome, keep hierarchy. The editor toolbar goes first — it is the
+     least load-bearing thing in the window. The agent panel goes next: at this
+     width, keeping all three columns squeezes the document until the product
+     reads as a thumbnail, which is the one outcome to avoid. Sidebar and
+     document stay, so navigating between sections still works. */
+  .toolbar {
+    display: none;
+  }
+
+  .agent {
+    display: none;
+  }
+
+  .panes {
+    grid-template-columns: var(--sidebar-w) 1fr;
+  }
+
+  .doc {
+    padding: 32px 36px 56px;
+  }
+}
+
+/* ==========================================================================
+   Phone — the whole app, scaled down
+
+   The window is NOT re-flowed for phones. It is laid out at its designed
+   1026.24 × 754 and scaled to fit, so every pane, row and label keeps its
+   drawn proportion and the visitor sees the actual product, entire.
+
+   Nothing in here may override a style inside the window — doing so would
+   distort the miniature. Only the page around it is adjusted.
+   ========================================================================== */
+
+@media (max-width: 767px) {
+  /* One screen, no page scroll. dvh, not vh, so the browser's collapsing
+     chrome cannot introduce a scrollbar. */
+  .hero {
+    --col: 100%;
+    height: 100dvh;
+    min-height: 0;
+    padding: 32px 0;
+    align-items: stretch;
+    /* Copy and product travel together, centred as one block, so the slack
+       falls above and below rather than opening a hole between them. */
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* Phone keeps the copy flush left — centred short lines read as a poster. */
+  .copy {
+    width: auto;
+    padding: 0 20px;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .wordmark {
+    width: 62%;
+    max-width: 260px;
+  }
+
+  .headline {
+    margin-top: 26px;
+    font-size: 21px;
+    line-height: 1.28;
+  }
+
+  .sub {
+    margin-top: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* The plate: a recessed surface the window sits on, with even air on all
+     four sides. `margin: auto` centres it in whatever height the copy leaves. */
+  .stage {
+    flex: none;
+    display: block;
+    width: auto;
+    margin: 28px 14px 0;
+    padding: 14px;
+    background: var(--stage);
+    border-radius: 18px;
+    overflow: hidden;
+  }
+
+  /* Measured host. Its height is set inline to the scaled window height so the
+     plate wraps the miniature exactly. */
+  .fit {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  /* Laid out at full size, then scaled. Width, height and transform are set
+     inline from the measured fit factor. */
+  .fitInner {
+    transform-origin: top left;
+  }
+}
+
+/* ==========================================================================
+   Reduced motion
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .caret,
+  .composerCaret {
+    animation: none;
+    opacity: 1;
+  }
+
+  .ctaPrimary,
+  .ctaSecondary,
+  .sectionItem,
+  .agentTab,
+  .link {
+    transition: none;
+  }
+}
