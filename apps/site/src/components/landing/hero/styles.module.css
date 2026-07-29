@@ -20,6 +20,12 @@
   --sidebar-w: 22.15%;
   --agent-w: 22.29%;
   --radius: 12px;
+  /* Frame values (136px of top air, an 88px gap) on a 1024-tall viewport, and
+     proportionally tighter as the viewport shortens. The composition rides up
+     rather than staying pinned, so the revision — the one moment of colour in
+     the window — clears the fold on a laptop. */
+  --air-top: clamp(56px, 12dvh, 136px);
+  --gap: clamp(44px, 8dvh, 88px);
   /* The column and the window are the same width — the copy hangs on the
      window's left edge. */
   --col: min(71.27%, 1280px);
@@ -27,8 +33,13 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: 100vh;
-  padding: 136px 0 120px;
+  /* The hero IS the desktop view: one screen, never scrolled. The frame
+     geometry is kept intact and the window is allowed to run off the bottom
+     edge — the crop is the composition, not an overflow to be solved. dvh, not
+     vh, so collapsing browser chrome cannot introduce a scrollbar. */
+  height: 100dvh;
+  padding: var(--air-top) 0 120px;
+  overflow: hidden;
   background: var(--site-bg);
 }
 
@@ -79,7 +90,7 @@
 .stage {
   width: var(--col);
   display: flex;
-  margin-top: 88px;
+  margin-top: var(--gap);
 }
 
 /* ==========================================================================
@@ -1003,16 +1014,13 @@
 @media (max-width: 1199px) and (min-width: 768px) {
   .hero {
     --sidebar-w: 26%;
+    --air-top: clamp(48px, 8.6dvh, 88px);
+    --gap: clamp(40px, 6.3dvh, 64px);
     --col: 88%;
-    padding-top: 88px;
   }
 
   .wordmark {
     width: 34%;
-  }
-
-  .stage {
-    margin-top: 64px;
   }
 
   /* Reduce chrome, keep hierarchy. The editor toolbar goes first — it is the
