@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { ThemeToggle } from "../../theme/ThemeToggle";
 import { HondoWordmark } from "../wordmark/HondoWordmark";
 import styles from "./styles.module.css";
 
@@ -11,17 +12,14 @@ const EDGE = 16;
 /** Room between the overlay and the text it frames; mirrors --pad-x/--pad-y in styles.module.css. */
 const PAD_X = 10;
 const PAD_Y = 8;
-const ACTIONS = ["Inspect", "Ask", "Annotate", "Keep"] as const;
+/** The toolbar's two pages of actions; the chevron slides between them. */
+const PAGES = [
+  ["Inspect", "Ask", "Keep"],
+  ["Annotate", "Source"],
+] as const;
 
 /** The visitor's selection: the box around all of it, in page coordinates. */
 type LiveSelection = { top: number; left: number; width: number; height: number; text: string };
-
-/**
- * The toolbar's two looks under comparison, switchable from the corner of the
- * page (or ?toolbar=light|dark). Temporary: keep the one that wins.
- */
-const THEMES = ["light", "dark"] as const;
-type Theme = (typeof THEMES)[number];
 
 /**
  * The landing as a type-specimen poster (after the ©Mamoth sheet): the
@@ -41,7 +39,6 @@ export function Poster() {
   const [playKey, setPlayKey] = useState(0);
   const [width, setWidth] = useState(0);
   const [live, setLive] = useState<LiveSelection | null>(null);
-  const [theme, setTheme] = useState<Theme>("dark");
 
   // Measure the phrase once the webfont is in, then play. Re-measure on
   // resize so a replay after the text reflows still lands on it.
@@ -52,8 +49,6 @@ export function Poster() {
     const measure = () => setWidth(target.offsetWidth);
     document.fonts.ready.then(() => {
       if (cancelled) return;
-      const asked = new URLSearchParams(window.location.search).get("toolbar");
-      if (asked === "light" || asked === "dark") setTheme(asked);
       measure();
       setPlayKey(1);
     });
@@ -66,7 +61,7 @@ export function Poster() {
   }, []);
 
   // The visitor's own selections: however much text, one overlay around all
-  // of it and the pill over that. Drawn once the pointer or key is released
+  // of it and the toolbar over that. Drawn once the pointer or key is released
   // (or, for touch handles, once the selection has settled), so it doesn't
   // chase the drag; cleared when the selection collapses or the page reflows.
   useEffect(() => {
@@ -121,11 +116,6 @@ export function Poster() {
     };
   }, []);
 
-  const choose = (next: Theme) => {
-    setTheme(next);
-    replay();
-  };
-
   const replay = () => {
     document.getSelection()?.removeAllRanges();
     setLive(null);
@@ -152,12 +142,18 @@ export function Poster() {
               <span
                 className={styles.demo}
                 key={playKey}
-                aria-hidden="true"
                 style={{ "--target-w": `${width}px` } as React.CSSProperties}
               >
-                <span className={styles.selection} />
-                <Toolbar className={styles.demoToolbar} theme={theme} />
-                <svg className={styles.cursor} width="18" height="22" viewBox="0 0 18 22" fill="none">
+                <span className={styles.selection} aria-hidden="true" />
+                <Toolbar className={styles.demoToolbar} />
+                <svg
+                  className={styles.cursor}
+                  width="18"
+                  height="22"
+                  viewBox="0 0 18 22"
+                  fill="none"
+                  aria-hidden="true"
+                >
                   <path
                     d="M2 1.5V17.2L6.55 12.9L9.7 20.5L12.85 19.15L9.8 12.15H16L2 1.5Z"
                     fill="#111"
@@ -205,20 +201,12 @@ export function Poster() {
           <Toolbar
             key={`toolbar:${live.top},${live.left},${live.text}`}
             className={styles.liveToolbar}
-            theme={theme}
-            interactive
             style={livePosition(live)}
           />
         </>
       ) : null}
 
-      <div className={styles.themes} role="group" aria-label="Toolbar theme">
-        {THEMES.map((t) => (
-          <button key={t} type="button" className={styles.theme} aria-pressed={theme === t} onClick={() => choose(t)}>
-            {t === "light" ? "Light" : "Dark"}
-          </button>
-        ))}
-      </div>
+      <ThemeToggle />
 
       <button type="button" className={styles.replay} aria-label="Replay selection demo" onClick={replay}>
         <svg
@@ -244,8 +232,8 @@ export function Poster() {
   );
 }
 
-/** Keep in step with .toolbar's width in styles.module.css. */
-const TOOLBAR_WIDTH = 248;
+/** Roughly the toolbar's widest page; for keeping the live one on screen. */
+const TOOLBAR_WIDTH = 210;
 
 /**
  * The live toolbar sits centered over the top of the overlay, slid back
@@ -261,59 +249,75 @@ function livePosition(live: LiveSelection): React.CSSProperties {
 }
 
 /**
- * Hondo's selection toolbar: a pill of the four things you can do with a
- * selection, centered over it. The scripted one is a picture; the live one
- * takes taps, and choosing an action moves the highlight to it. Pressing it
- * doesn't clear the selection it belongs to.
+ * Hondo's selection toolbar, after Framer University's text-selection
+ * tooltip: a dark segmented bar centered over the selection that fades and
+ * scales in. The chevron slides to a second page of actions. Both pages sit
+ * side by side on a track inside the clipped bar; the bar animates to the
+ * width of the page showing while the track slides by the width of the
+ * first, so the content slides and the bar resizes together. Pressing the
+ * bar doesn't clear the selection it belongs to. The actions don't do
+ * anything yet.
  */
-function Toolbar({
-  theme,
-  interactive = false,
-  className,
-  style,
-}: {
-  theme: Theme;
-  interactive?: boolean;
-  className?: string;
-  style?: React.CSSProperties;
-}) {
-  const [chosen, setChosen] = useState<(typeof ACTIONS)[number]>("Inspect");
-  const pill = `${styles.toolbar} ${className ?? ""}`;
+function Toolbar({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  const [page, setPage] = useState(0);
+  const [widths, setWidths] = useState<[number, number] | null>(null);
+  const firstRef = useRef<HTMLSpanElement>(null);
+  const secondRef = useRef<HTMLSpanElement>(null);
 
-  if (!interactive) {
-    return (
-      <span className={pill} data-theme={theme} style={style} aria-hidden="true">
-        {ACTIONS.map((action) => (
-          <span key={action} className={styles.action} data-active={action === chosen ? "" : undefined}>
-            {action}
-          </span>
-        ))}
-      </span>
-    );
-  }
+  useEffect(() => {
+    const first = firstRef.current;
+    const second = secondRef.current;
+    if (!first || !second) return;
+    const observer = new ResizeObserver(() => setWidths([first.offsetWidth, second.offsetWidth]));
+    observer.observe(first);
+    observer.observe(second);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <span
-      className={pill}
-      data-theme={theme}
-      data-interactive=""
-      style={style}
+      className={`${styles.toolbar} ${className ?? ""}`}
+      style={{ ...style, width: widths ? widths[page] : undefined }}
       role="toolbar"
       aria-label="Hondo"
       onPointerDown={(event) => event.preventDefault()}
     >
-      {ACTIONS.map((action) => (
-        <button
-          key={action}
-          type="button"
-          className={styles.action}
-          data-active={action === chosen ? "" : undefined}
-          aria-pressed={action === chosen}
-          onClick={() => setChosen(action)}
-        >
-          {action}
-        </button>
-      ))}
+      <span className={styles.track} style={{ transform: page && widths ? `translateX(${-widths[0]}px)` : undefined }}>
+        <span ref={firstRef} className={styles.page} inert={page !== 0}>
+          {PAGES[0].map((action) => (
+            <button key={action} type="button" className={styles.segment}>
+              {action}
+            </button>
+          ))}
+          <button type="button" className={styles.chevron} aria-label="More actions" onClick={() => setPage(1)}>
+            <Chevron flip={false} />
+          </button>
+        </span>
+        <span ref={secondRef} className={styles.page} inert={page !== 1}>
+          <button type="button" className={styles.chevron} aria-label="Back" onClick={() => setPage(0)}>
+            <Chevron flip />
+          </button>
+          {PAGES[1].map((action) => (
+            <button key={action} type="button" className={styles.segment}>
+              {action}
+            </button>
+          ))}
+        </span>
+      </span>
     </span>
+  );
+}
+
+function Chevron({ flip }: { flip: boolean }) {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <path
+        d={flip ? "M7.5 2.5L4 6L7.5 9.5" : "M4.5 2.5L8 6L4.5 9.5"}
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }

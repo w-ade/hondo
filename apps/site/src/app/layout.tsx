@@ -19,7 +19,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={inter.variable}>
+    // the script below may set data-theme before React hydrates
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
+      <head>
+        {/* apply a saved theme choice (ThemeToggle) before first paint, so a
+            visitor who picked the other theme never sees a flash of the device one */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}`,
+          }}
+        />
+      </head>
       <body>{children}</body>
     </html>
   );
