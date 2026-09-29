@@ -17,7 +17,7 @@ type Props = {
    * to the background behind it.
    */
   outline?: number;
-  /** Redraw the edge a few times a second with a slight wobble, like a hand-drawn line boiling. */
+  /** Redraw the edge a few times a second with a slight wobble, like a hand-drawn line boiling (slower under reduced motion). */
   boil?: boolean;
   className?: string;
 };

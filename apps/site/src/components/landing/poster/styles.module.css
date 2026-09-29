@@ -22,6 +22,10 @@
 .poster ::selection {
   background: rgb(199 125 255 / 0.28);
 }
+/* once the overlay is drawn around a selection, it stands in for the highlight */
+.poster[data-live] ::selection {
+  background: transparent;
+}
 
 .wordmark {
   width: 50%;
@@ -89,8 +93,17 @@
 }
 
 @media (max-width: 640px) {
-  .wordmark { width: 72%; }
-  .specimen { width: 90%; }
+  .wordmark { align-self: flex-start; width: 72%; }
+  /* Fill the width, but keep ON MACOS on the line with "and keep,": that
+     line measures 6.91em, so 1/7.5 of the column fits it with room to spare. */
+  .statement {
+    align-self: stretch;
+    max-width: none;
+    font-size: calc((100vw - 2 * max(16px, 4vw)) / 7.5);
+    text-align: left;
+    text-wrap: pretty;
+  }
+  .specimen { align-self: flex-start; width: 90%; }
   .footer { grid-template-columns: 1fr; }
   .credit { justify-self: start; }
 }
@@ -98,10 +111,11 @@
 /* ---------------------------------------------------------------------------
    The scripted selection. The phrase keeps its measure; the overlay, toolbar
    and cursor are absolute children, remounted with a new key for each replay.
-   The selection sits 4px outside the phrase on each side. The cursor's
-   hotspot is at (2, 1.5) in its 18×22 box, so left: -9px puts it on the
-   selection's left edge at translate(3px), and the drag ends on the right
-   edge at the phrase's measured width + 11px. */
+   The overlay sits --pad-x / --pad-y outside the phrase (mirrored as PAD_X /
+   PAD_Y in Poster.tsx). The cursor's hotspot is at (2, 1.5) in its 18×22
+   box, so left: -(pad-x + 5px) puts it on the overlay's left edge at
+   translate(3px), and the drag ends on the right edge at the phrase's
+   measured width + 2 × pad-x + 3px. */
 
 .target {
   position: relative;
@@ -109,27 +123,37 @@
   white-space: nowrap;
 }
 .demo {
+  --pad-x: 10px;
+  --pad-y: 8px;
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
-.selection {
+.selection,
+.liveSelection {
   position: absolute;
   z-index: 1;
-  inset: 0 -4px;
   border: 1px solid #c77dff;
-  border-radius: 4px;
+  border-radius: 6px;
   background: rgb(199 125 255 / 0.2);
   box-shadow: 0 0 12px rgb(199 125 255 / 0.12);
+  pointer-events: none;
+}
+.selection {
+  inset: calc(-1 * var(--pad-y)) calc(-1 * var(--pad-x));
   clip-path: inset(0 100% 0 0);
   animation: reveal 575ms cubic-bezier(0.645, 0.045, 0.355, 1) 1660ms both;
 }
+/* the visitor's: placed in page coordinates by Poster */
+.liveSelection {
+  animation: fade-in 120ms ease-out both;
+}
 .cursor {
-  --end: calc(var(--target-w, 300px) + 11px);
+  --end: calc(var(--target-w, 300px) + 2 * var(--pad-x) + 3px);
   position: absolute;
   z-index: 3;
   top: calc(50% - 1.5px);
-  left: -9px;
+  left: calc(-1 * var(--pad-x) - 5px);
   opacity: 0;
   transform: translate(360px, 160px);
   transform-box: view-box;
@@ -153,78 +177,131 @@
 }
 
 /* ---------------------------------------------------------------------------
-   Hondo's selection toolbar. It sits inside the huge sentence, so it sets its
-   own type rather than inheriting 84px. Width is mirrored in Poster.tsx. */
+   Hondo's selection toolbar: a pill of actions centered over the selection,
+   light or dark. It sits inside the huge sentence, so it sets its own type
+   rather than inheriting 84px caps. Width is mirrored in Poster.tsx. The
+   centering lives in `translate`, so the entrance can animate `transform`. */
 
 .toolbar {
+  --pill-bg: #ffffff;
+  --pill-ink: #333333;
+  --pill-active-bg: rgb(199 125 255 / 0.16);
+  --pill-active-ink: #7b2cbf;
+  --pill-edge: 0 0 0 1px rgb(0 0 0 / 0.08);
+  --pill-hover-bg: rgb(0 0 0 / 0.05);
+
   position: absolute;
   z-index: 2;
   display: flex;
-  flex-direction: column;
-  width: 288px;
+  gap: 2px;
+  width: 248px;
   padding: 4px;
-  border: 1px solid rgb(0 0 0 / 0.08);
-  border-radius: 10px;
-  background: #ffffff;
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.06), 0 8px 24px rgb(0 0 0 / 0.08);
-  color: #333333;
+  border-radius: 999px;
+  background: var(--pill-bg);
+  box-shadow: var(--pill-edge), 0 1px 2px rgb(0 0 0 / 0.08), 0 8px 24px rgb(0 0 0 / 0.12);
+  color: var(--pill-ink);
   font-size: 13px;
   font-weight: 500;
   line-height: 1.3;
   letter-spacing: 0;
   text-align: left;
+  text-transform: none;
   white-space: nowrap;
   pointer-events: none;
   user-select: none;
-  transform-origin: top left;
+  transform-origin: bottom center;
 }
-.actions {
-  display: flex;
-  gap: 2px;
+.toolbar[data-theme="dark"] {
+  --pill-bg: #1a1a1a;
+  --pill-ink: #f2f2f2;
+  --pill-active-bg: rgb(199 125 255 / 0.32);
+  --pill-active-ink: #f3e3ff;
+  --pill-edge: 0 0 0 1px rgb(255 255 255 / 0.06);
+  --pill-hover-bg: rgb(255 255 255 / 0.08);
 }
 .action {
   padding: 5px 9px;
-  border-radius: 6px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: inherit;
+  font: inherit;
+}
+.toolbar[data-interactive] {
+  pointer-events: auto;
+}
+.toolbar[data-interactive] .action {
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+@media (hover: hover) {
+  .toolbar[data-interactive] .action:not([data-active]):hover {
+    background: var(--pill-hover-bg);
+  }
+}
+.toolbar[data-interactive] .action:focus-visible {
+  outline: 2px solid #c77dff;
+  outline-offset: -2px;
 }
 .action[data-active] {
-  background: rgb(199 125 255 / 0.16);
-  color: #7b2cbf;
-}
-.source {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 4px;
-  padding: 6px 9px 4px;
-  border-top: 1px solid #efefef;
-  color: #888888;
-  font-size: 12px;
-  font-weight: 400;
-}
-.quote {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #333333;
-}
-.origin {
-  flex-shrink: 0;
+  background: var(--pill-active-bg);
+  color: var(--pill-active-ink);
 }
 
-/* opens once the drag has finished revealing the selection */
+/* the scripted one opens once the drag has finished revealing the selection */
 .demoToolbar {
-  top: calc(100% + 10px);
-  left: -4px;
+  bottom: calc(100% + var(--pad-y) + 8px);
+  left: 50%;
+  translate: -50% 0;
   animation: toolbar-in 220ms cubic-bezier(0.23, 1, 0.32, 1) 2380ms both;
 }
-/* positioned in page coordinates from the visitor's selection */
+/* the live one gets page coordinates (center, top of the first line) */
 .liveToolbar {
-  margin-top: 10px;
+  translate: -50% calc(-100% - 8px);
   animation: toolbar-in 180ms cubic-bezier(0.23, 1, 0.32, 1) both;
 }
 @keyframes toolbar-in {
-  from { opacity: 0; transform: translateY(-4px) scale(0.97); }
+  from { opacity: 0; transform: translateY(4px) scale(0.97); }
   to { opacity: 1; transform: none; }
+}
+
+/* the light/dark switch, beside replay; temporary */
+.themes {
+  position: fixed;
+  right: 44px;
+  bottom: 14px;
+  z-index: 4;
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 8px;
+  background: rgb(0 0 0 / 0.04);
+  user-select: none;
+}
+.theme {
+  height: 24px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: #888888;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.theme[aria-pressed="true"] {
+  background: #ffffff;
+  color: #111111;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+}
+.theme:focus-visible {
+  outline: 2px solid #1a1a1a;
+  outline-offset: -2px;
+}
+@media (pointer: coarse) {
+  .themes { right: 52px; bottom: 6px; }
+  .theme { height: 36px; padding: 0 12px; font-size: 14px; }
 }
 
 /* ---------------------------------------------------------------------------
@@ -264,7 +341,7 @@
     clip-path: inset(0);
   }
   .demoToolbar,
-  .liveToolbar { animation: fade-in 200ms ease-out both; }
+  .liveToolbar { animation-name: fade-in; }
   .replay:active { transform: none; }
   .replayIcon { transition: none; }
 }

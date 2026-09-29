@@ -9,6 +9,9 @@
   66.667% { filter: url(#hondo-boil-2); }
 }
 
+/* Reduced motion slows the boil rather than stopping it: the line only
+   shifts by ~2px, and held for most of a second a frame reads as texture,
+   not movement. */
 @media (prefers-reduced-motion: reduce) {
-  .boil { animation: none; }
+  .boil { animation-duration: 2400ms; }
 }
