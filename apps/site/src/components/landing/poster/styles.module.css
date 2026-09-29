@@ -45,12 +45,12 @@
   text-wrap: balance;
 }
 
-/* the small bold serif dropped into a line, as in "Perth,Western AUS" */
+/* a small bold all-caps aside dropped into a line, as in "Perth,Western AUS" */
 .aside {
-  font-family: "Times New Roman", Times, serif;
-  font-size: 0.5em;
+  font-size: 0.4em;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
 .specimen {
@@ -82,7 +82,7 @@
   max-width: 30em;
 }
 .about .aside {
-  font-size: 0.7em;
+  font-size: 0.72em;
 }
 .credit {
   justify-self: center;
