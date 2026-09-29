@@ -1,0 +1,14 @@
+/* The boil: hold each noise frame for a third of the cycle, then jump. */
+.boil {
+  filter: url(#hondo-boil-0);
+  animation: boil 420ms step-end infinite;
+}
+@keyframes boil {
+  0% { filter: url(#hondo-boil-0); }
+  33.333% { filter: url(#hondo-boil-1); }
+  66.667% { filter: url(#hondo-boil-2); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boil { animation: none; }
+}

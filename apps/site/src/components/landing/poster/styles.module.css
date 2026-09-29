@@ -1,0 +1,274 @@
+/* The landing poster (Poster.tsx). Laid out like the ©Mamoth type specimen:
+   everything centered in one column, the wordmark, a huge tight sentence, the
+   wordmark again as a boiling outline, a caption, and small print at the foot.
+   The selection overlay is the purple from the old landing (#C77DFF). */
+
+.poster {
+  --ground: #fafaf9;
+  --ink: #111111;
+  --wordmark-knockout: var(--ground);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: max(16px, 4vw) max(16px, 4vw) max(16px, 2.5vw);
+  overflow-x: clip;
+  background: var(--ground);
+  color: var(--ink);
+}
+.poster ::selection {
+  background: rgb(199 125 255 / 0.28);
+}
+
+.wordmark {
+  width: 50%;
+}
+.wordmarkArt,
+.specimen {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* the huge sentence */
+.statement {
+  max-width: 16.5em;
+  margin-top: 0.4em;
+  font-size: clamp(26px, 4.6vw, 84px);
+  font-weight: 500;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  text-align: center;
+  text-wrap: balance;
+}
+
+/* the small bold serif dropped into a line, as in "Perth,Western AUS" */
+.aside {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 0.5em;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.specimen {
+  width: 64%;
+  margin-top: clamp(28px, 4.5vw, 72px);
+}
+
+.caption {
+  display: flex;
+  gap: 2.2em;
+  margin-top: 0.15em;
+  font-size: clamp(20px, 3vw, 52px);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.footer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  width: 100%;
+  margin-top: auto;
+  padding-top: clamp(56px, 9vw, 160px);
+  font-size: clamp(13px, 1.2vw, 18px);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+.about {
+  max-width: 30em;
+}
+.about .aside {
+  font-size: 0.7em;
+}
+.credit {
+  justify-self: center;
+}
+
+@media (max-width: 640px) {
+  .wordmark { width: 72%; }
+  .specimen { width: 90%; }
+  .footer { grid-template-columns: 1fr; }
+  .credit { justify-self: start; }
+}
+
+/* ---------------------------------------------------------------------------
+   The scripted selection. The phrase keeps its measure; the overlay, toolbar
+   and cursor are absolute children, remounted with a new key for each replay.
+   The selection sits 4px outside the phrase on each side. The cursor's
+   hotspot is at (2, 1.5) in its 18×22 box, so left: -9px puts it on the
+   selection's left edge at translate(3px), and the drag ends on the right
+   edge at the phrase's measured width + 11px. */
+
+.target {
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+}
+.demo {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.selection {
+  position: absolute;
+  z-index: 1;
+  inset: 0 -4px;
+  border: 1px solid #c77dff;
+  border-radius: 4px;
+  background: rgb(199 125 255 / 0.2);
+  box-shadow: 0 0 12px rgb(199 125 255 / 0.12);
+  clip-path: inset(0 100% 0 0);
+  animation: reveal 575ms cubic-bezier(0.645, 0.045, 0.355, 1) 1660ms both;
+}
+.cursor {
+  --end: calc(var(--target-w, 300px) + 11px);
+  position: absolute;
+  z-index: 3;
+  top: calc(50% - 1.5px);
+  left: -9px;
+  opacity: 0;
+  transform: translate(360px, 160px);
+  transform-box: view-box;
+  transform-origin: 2px 1.5px;
+  animation: cursor-run 2600ms linear both;
+}
+
+@keyframes reveal {
+  to { clip-path: inset(0); }
+}
+@keyframes cursor-run {
+  0% { opacity: 0; transform: translate(360px, 160px) rotate(-8deg); animation-timing-function: cubic-bezier(0.19, 1, 0.22, 1); }
+  5% { opacity: 1; }
+  50% { opacity: 1; transform: translate(3px, 0) rotate(0deg); }
+  57% { transform: translate(3px, 0) scale(0.97); }
+  64% { transform: translate(3px, 0) scale(0.97); animation-timing-function: cubic-bezier(0.645, 0.045, 0.355, 1); }
+  86% { opacity: 1; transform: translate(var(--end), 0) scale(0.97); }
+  90% { opacity: 1; transform: translate(var(--end), 0); animation-timing-function: cubic-bezier(0.19, 1, 0.22, 1); }
+  96% { opacity: 1; transform: translate(calc(var(--end) + 14px), 17px); }
+  100% { opacity: 0; transform: translate(calc(var(--end) + 25px), 26px); }
+}
+
+/* ---------------------------------------------------------------------------
+   Hondo's selection toolbar. It sits inside the huge sentence, so it sets its
+   own type rather than inheriting 84px. Width is mirrored in Poster.tsx. */
+
+.toolbar {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  width: 288px;
+  padding: 4px;
+  border: 1px solid rgb(0 0 0 / 0.08);
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.06), 0 8px 24px rgb(0 0 0 / 0.08);
+  color: #333333;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0;
+  text-align: left;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  transform-origin: top left;
+}
+.actions {
+  display: flex;
+  gap: 2px;
+}
+.action {
+  padding: 5px 9px;
+  border-radius: 6px;
+}
+.action[data-active] {
+  background: rgb(199 125 255 / 0.16);
+  color: #7b2cbf;
+}
+.source {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 4px;
+  padding: 6px 9px 4px;
+  border-top: 1px solid #efefef;
+  color: #888888;
+  font-size: 12px;
+  font-weight: 400;
+}
+.quote {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #333333;
+}
+.origin {
+  flex-shrink: 0;
+}
+
+/* opens once the drag has finished revealing the selection */
+.demoToolbar {
+  top: calc(100% + 10px);
+  left: -4px;
+  animation: toolbar-in 220ms cubic-bezier(0.23, 1, 0.32, 1) 2380ms both;
+}
+/* positioned in page coordinates from the visitor's selection */
+.liveToolbar {
+  margin-top: 10px;
+  animation: toolbar-in 180ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+@keyframes toolbar-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---------------------------------------------------------------------------
+   replay, fixed in the bottom-right corner: a 14px mark in a 28px hit area
+   (44px on touch), pale gray, black on hover */
+
+.replay {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #c4c6c8;
+  cursor: pointer;
+  transition: color 150ms ease, transform 150ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+@media (hover: hover) {
+  .replay:hover { color: #000; }
+}
+.replay:active { transform: scale(0.9); }
+.replay:focus-visible { color: #000; outline: 2px solid #1a1a1a; outline-offset: -2px; }
+@media (pointer: coarse) {
+  .replay { right: 4px; bottom: 4px; width: 44px; height: 44px; }
+}
+.replayIcon { transition: transform 1000ms cubic-bezier(0.23, 1, 0.32, 1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor { display: none; }
+  .selection {
+    animation: fade-in 200ms ease-out both;
+    clip-path: inset(0);
+  }
+  .demoToolbar,
+  .liveToolbar { animation: fade-in 200ms ease-out both; }
+  .replay:active { transform: none; }
+  .replayIcon { transition: none; }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

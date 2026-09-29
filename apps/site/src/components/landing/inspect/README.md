@@ -26,4 +26,4 @@ phrase or the font and the path still lands.
 
 Reduced motion: no cursor; the selection fades in over 200ms.
 
-The previous workspace hero is at `/experiments/workspace`.
+Moved off the landing to `/experiments/inspect`; the workspace hero before it is at `/experiments/workspace`.

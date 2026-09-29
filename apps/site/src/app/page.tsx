@@ -1,8 +1,9 @@
-import { InspectHero } from "@/components/landing/inspect/InspectHero";
+import { Poster } from "@/components/landing/poster/Poster";
 
-// hondo.wiki landing. Built out from the Hondo card on brianawade.com: the
-// page's own text, inspected by a cursor-driven dev overlay. The previous
-// workspace hero lives at /experiments/workspace.
+// hondo.wiki landing: a type-specimen poster built around the swollen
+// wordmark, demonstrating the app by selecting its own text. The cursor-and-
+// overlay landing before it is at /experiments/inspect, the workspace hero
+// before that at /experiments/workspace.
 export default function Home() {
-  return <InspectHero />;
+  return <Poster />;
 }
