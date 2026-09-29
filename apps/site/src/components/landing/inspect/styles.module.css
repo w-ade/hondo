@@ -1,0 +1,139 @@
+/* The landing (InspectHero.tsx). Values carried over from the Hondo card on
+   brianawade.com: the #FAFAF9 ground, a 360px column of 13px text, the purple
+   dev overlay, and the cursor's timing. */
+
+.stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 16px;
+  overflow: clip; /* the cursor enters from past the right edge on phones */
+  background: #fafaf9;
+}
+
+/* the two paragraphs: a narrow column centered on the page */
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(360px, 100%);
+  font-size: 13px;
+  line-height: 1.55;
+  color: #333333;
+}
+
+/* The wordmark, small, flush left over the summary. Same box/art split as the
+   old hero: the artwork overflows its designed 305.27 × 51.79 box slightly
+   (−0.33% x, −1.96% y), so the box and the art are sized separately. */
+.wordmark {
+  position: relative;
+  width: 80px;
+  aspect-ratio: 305.2748 / 51.7887;
+  margin-bottom: 12px; /* 24px to the summary with the column gap */
+}
+.wordmarkArt {
+  position: absolute;
+  left: -0.33%;
+  top: -1.96%;
+  width: 100.66%;
+  height: 103.92%;
+}
+
+/* The selected words keep their normal measure. The overlay and cursor are
+   absolute children, remounted with a new key for each replay. */
+.target {
+  position: relative;
+  display: inline-block;
+}
+.animation {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.selection {
+  position: absolute;
+  z-index: 1;
+  inset: -2px -3px;
+  border: 1px solid #c77dff;
+  border-radius: 3px;
+  background: rgb(199 125 255 / 0.2);
+  box-shadow: 0 0 12px rgb(199 125 255 / 0.12);
+  clip-path: inset(0 100% 0 0);
+  animation: reveal 575ms cubic-bezier(0.645, 0.045, 0.355, 1) 1660ms both;
+}
+
+/* The cursor's hotspot sits at (2, 1.5) in its 18×22 box; left: -8px puts it
+   on the selection's left edge (-3px) at translate(3px). The drag ends on the
+   right edge: the target's measured width + 9px. */
+.cursor {
+  --end: calc(var(--target-w, 110px) + 9px);
+  position: absolute;
+  z-index: 3;
+  top: -3px;
+  left: -8px;
+  opacity: 0;
+  transform: translate(360px, 160px);
+  transform-box: view-box;
+  transform-origin: 2px 1.5px;
+  animation: cursor-run 2600ms linear both;
+}
+
+@keyframes reveal {
+  to { clip-path: inset(0); }
+}
+@keyframes cursor-run {
+  0% { opacity: 0; transform: translate(360px, 160px) rotate(-8deg); animation-timing-function: cubic-bezier(0.19, 1, 0.22, 1); }
+  5% { opacity: 1; }
+  50% { opacity: 1; transform: translate(3px, 0) rotate(0deg); }
+  57% { transform: translate(3px, 0) scale(0.97); }
+  64% { transform: translate(3px, 0) scale(0.97); animation-timing-function: cubic-bezier(0.645, 0.045, 0.355, 1); }
+  86% { opacity: 1; transform: translate(var(--end), 0) scale(0.97); }
+  90% { opacity: 1; transform: translate(var(--end), 0); animation-timing-function: cubic-bezier(0.19, 1, 0.22, 1); }
+  96% { opacity: 1; transform: translate(calc(var(--end) + 14px), 17px); }
+  100% { opacity: 0; transform: translate(calc(var(--end) + 25px), 26px); }
+}
+
+/* replay, tucked in the bottom-right corner: a 14px mark in a 28px hit area
+   (44px on touch), pale gray, black on hover */
+.replay {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #c4c6c8;
+  cursor: pointer;
+  transition: color 150ms ease, transform 150ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+@media (hover: hover) {
+  .replay:hover { color: #000; }
+}
+.replay:active { transform: scale(0.9); }
+.replay:focus-visible { color: #000; outline: 2px solid #1a1a1a; outline-offset: -2px; }
+@media (pointer: coarse) {
+  .replay { right: 4px; bottom: 4px; width: 44px; height: 44px; }
+}
+/* each click adds a turn (set inline); the strong ease-out snaps it round
+   and lets it coast to rest */
+.replayIcon { transition: transform 1000ms cubic-bezier(0.23, 1, 0.32, 1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor { display: none; }
+  .selection {
+    animation: selection-fade 200ms ease-out both;
+    clip-path: inset(0);
+  }
+  .replay:active { transform: none; }
+  .replayIcon { transition: none; }
+}
+@keyframes selection-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
